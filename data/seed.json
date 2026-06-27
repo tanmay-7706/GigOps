@@ -1,0 +1,212 @@
+{
+  "professionals": [
+    {
+      "id": "prof_001",
+      "name": "Priya Sharma",
+      "city": "Jaipur",
+      "serviceTypes": ["Waxing", "Facial"],
+      "qualityScore": 3.8,
+      "totalBookings": 134,
+      "activeComplaints": 2,
+      "status": "flagged",
+      "joinedDate": "2024-03-12",
+      "lastServiceDate": "2026-06-25"
+    },
+    {
+      "id": "prof_002",
+      "name": "Sunita Devi",
+      "city": "Jaipur",
+      "serviceTypes": ["Massage", "Body Spa"],
+      "qualityScore": 4.7,
+      "totalBookings": 210,
+      "activeComplaints": 0,
+      "status": "active",
+      "joinedDate": "2023-11-05",
+      "lastServiceDate": "2026-06-26"
+    },
+    {
+      "id": "prof_003",
+      "name": "Kavita Rani",
+      "city": "Jaipur",
+      "serviceTypes": ["Pedicure", "Manicure"],
+      "qualityScore": 4.1,
+      "totalBookings": 98,
+      "activeComplaints": 1,
+      "status": "active",
+      "joinedDate": "2024-06-20",
+      "lastServiceDate": "2026-06-24"
+    },
+    {
+      "id": "prof_004",
+      "name": "Rekha Gupta",
+      "city": "Jaipur",
+      "serviceTypes": ["Facial", "Cleanup"],
+      "qualityScore": 2.9,
+      "totalBookings": 67,
+      "activeComplaints": 3,
+      "status": "under-review",
+      "joinedDate": "2024-09-15",
+      "lastServiceDate": "2026-06-23"
+    },
+    {
+      "id": "prof_005",
+      "name": "Meena Joshi",
+      "city": "Jaipur",
+      "serviceTypes": ["Waxing", "Hair Spa"],
+      "qualityScore": 4.9,
+      "totalBookings": 245,
+      "activeComplaints": 0,
+      "status": "active",
+      "joinedDate": "2023-07-01",
+      "lastServiceDate": "2026-06-26"
+    },
+    {
+      "id": "prof_006",
+      "name": "Deepa Verma",
+      "city": "Jaipur",
+      "serviceTypes": ["Facial", "Bridal"],
+      "qualityScore": 4.4,
+      "totalBookings": 156,
+      "activeComplaints": 0,
+      "status": "active",
+      "joinedDate": "2024-01-10",
+      "lastServiceDate": "2026-06-25"
+    },
+    {
+      "id": "prof_007",
+      "name": "Anita Bajpai",
+      "city": "Jaipur",
+      "serviceTypes": ["Massage", "Pedicure"],
+      "qualityScore": 3.5,
+      "totalBookings": 89,
+      "activeComplaints": 2,
+      "status": "flagged",
+      "joinedDate": "2024-05-18",
+      "lastServiceDate": "2026-06-24"
+    },
+    {
+      "id": "prof_008",
+      "name": "Shalini Tiwari",
+      "city": "Jaipur",
+      "serviceTypes": ["Waxing", "Cleanup"],
+      "qualityScore": 4.6,
+      "totalBookings": 178,
+      "activeComplaints": 0,
+      "status": "active",
+      "joinedDate": "2023-12-22",
+      "lastServiceDate": "2026-06-26"
+    }
+  ],
+  "feedback": [
+    {
+      "id": "fb_001",
+      "professionalId": "prof_004",
+      "professionalName": "Rekha Gupta",
+      "customerName": "Ananya Gupta",
+      "serviceType": "Facial",
+      "bookingDate": "2026-06-23",
+      "feedbackText": "She mixed the wrong products and my face broke out in rashes. I had to visit a dermatologist. This is completely unacceptable.",
+      "submittedAt": "2026-06-23T19:45:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_002",
+      "professionalId": "prof_001",
+      "professionalName": "Priya Sharma",
+      "customerName": "Ritika Malhotra",
+      "serviceType": "Facial",
+      "bookingDate": "2026-06-25",
+      "feedbackText": "The professional arrived 40 minutes late and then rushed through everything. My skin feels raw. I paid full price for a half-done job.",
+      "submittedAt": "2026-06-25T18:30:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_003",
+      "professionalId": "prof_007",
+      "professionalName": "Anita Bajpai",
+      "customerName": "Neha Kapoor",
+      "serviceType": "Massage",
+      "bookingDate": "2026-06-24",
+      "feedbackText": "She arrived 20 minutes late without any apology. The massage was okay but shorter than the promised duration.",
+      "submittedAt": "2026-06-24T20:15:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_004",
+      "professionalId": "prof_003",
+      "professionalName": "Kavita Rani",
+      "customerName": "Simran Arora",
+      "serviceType": "Pedicure",
+      "bookingDate": "2026-06-24",
+      "feedbackText": "The pedicure tools looked like they weren't properly sealed. Made me uncomfortable though the service itself was fine.",
+      "submittedAt": "2026-06-24T17:00:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_005",
+      "professionalId": "prof_001",
+      "professionalName": "Priya Sharma",
+      "customerName": "Divya Rathi",
+      "serviceType": "Waxing",
+      "bookingDate": "2026-06-25",
+      "feedbackText": "Second time booking Priya and she was late again. The work quality is fine but punctuality is a real issue.",
+      "submittedAt": "2026-06-25T16:00:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_006",
+      "professionalId": "prof_007",
+      "professionalName": "Anita Bajpai",
+      "customerName": "Pooja Singh",
+      "serviceType": "Pedicure",
+      "bookingDate": "2026-06-24",
+      "feedbackText": "The professional didn't bring all the products listed for the service. Had to substitute some items.",
+      "submittedAt": "2026-06-24T19:30:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_007",
+      "professionalId": "prof_002",
+      "professionalName": "Sunita Devi",
+      "customerName": "Isha Mehta",
+      "serviceType": "Massage",
+      "bookingDate": "2026-06-26",
+      "feedbackText": "Sunita was absolutely wonderful. She arrived on time, explained every step, and the massage was deeply relaxing. Booking her every week!",
+      "submittedAt": "2026-06-26T14:00:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_008",
+      "professionalId": "prof_005",
+      "professionalName": "Meena Joshi",
+      "customerName": "Kriti Agarwal",
+      "serviceType": "Waxing",
+      "bookingDate": "2026-06-26",
+      "feedbackText": "Best waxing experience I've ever had. Meena is so skilled and professional. My skin feels amazing.",
+      "submittedAt": "2026-06-26T11:30:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_009",
+      "professionalId": "prof_006",
+      "professionalName": "Deepa Verma",
+      "customerName": "Tanvi Bhatt",
+      "serviceType": "Bridal",
+      "bookingDate": "2026-06-25",
+      "feedbackText": "Deepa did my bridal makeup trial and it was stunning. She understood exactly what I wanted. Highly recommend!",
+      "submittedAt": "2026-06-25T13:00:00Z",
+      "status": "pending"
+    },
+    {
+      "id": "fb_010",
+      "professionalId": "prof_008",
+      "professionalName": "Shalini Tiwari",
+      "customerName": "Aanchal Nair",
+      "serviceType": "Cleanup",
+      "bookingDate": "2026-06-26",
+      "feedbackText": "Shalini is always on time and the quality is consistently great. Love having her.",
+      "submittedAt": "2026-06-26T16:45:00Z",
+      "status": "pending"
+    }
+  ]
+}

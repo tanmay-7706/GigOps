@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GigOps — AI Operations Agent for Gig Workforce Platforms
 
-## Getting Started
+> Built for the Gappy AI Hackathon (Lemma SDK) | June 2026
 
-First, run the development server:
+GigOps is an agentic operations desk for home-services platforms managing
+large gig workforces. It processes customer feedback through a Lemma SDK
+workflow — classifying severity, drafting escalation actions, and updating
+professional quality scores automatically.
 
+## What it does
+- Triages 50–100 customer feedback messages in under 60 seconds
+- Classifies each as CRITICAL / WARNING / POSITIVE using a Lemma AI Agent
+- Drafts escalation messages and internal ops notes via a second Agent
+- Updates gig worker quality scores in a Lemma Datastore automatically
+- Shows area managers a live Team Health Board — zero manual input
+
+## Built With
+- Next.js 15 (App Router) + TypeScript
+- Tailwind CSS + Shadcn UI
+- Lemma SDK (Datastore, DocumentStore, Agents, Workflow, Functions)
+
+## Setup
 ```bash
+git clone https://github.com/tanmay-7706/gigops
+cd gigops
+npm install
+cp .env.example .env.local   # fill in your keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Team
+Built by Tanmay Singh & Aaryan Yadav — B.Tech CS-AI, Newton School of Technology
