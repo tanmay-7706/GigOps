@@ -30,6 +30,10 @@ export interface CustomerFeedback {
   feedbackText: string;
   submittedAt: string;
   status: FeedbackStatus;
+  // Attached by the triage workflow once the feedback has been processed:
+  triageResult?: TriageResult;
+  actionDraft?: ActionDraft;
+  approvedMessage?: string;
 }
 
 // Schema 3: Triage Result (output from Triage Agent)
@@ -77,10 +81,12 @@ export interface DashboardStats {
 export interface WorkflowResult {
   processed: number;
   results: TriageResult[];
+  failed: { feedbackId: string; error: string }[];
 }
 
 // Approve action result
 export interface ApproveActionResult {
   success: boolean;
   updatedScore: number;
+  updatedStatus: ProfessionalStatus;
 }
