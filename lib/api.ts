@@ -20,6 +20,9 @@ async function apiFetch<T>(
   options?: RequestInit
 ): Promise<ApiResponse<T>> {
   const res = await fetch(`${BASE_URL}${endpoint}`, {
+    // Always hit the server — the board must reflect live state after the
+    // workflow runs, so the browser must not serve cached GET responses.
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       ...options?.headers,
