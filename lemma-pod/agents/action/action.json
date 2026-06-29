@@ -1,0 +1,8 @@
+{
+  "name": "action",
+  "description": "Given a classified complaint, drafts the operational action: a customer-facing message, an internal ops note, and a quality-score adjustment. Replies with JSON only.",
+  "instruction": { "$file": "instruction.md" },
+  "toolsets": [],
+  "visibility": "POD",
+  "permissions": { "grants": [] }
+}

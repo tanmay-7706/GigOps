@@ -1,0 +1,8 @@
+{
+  "name": "triage",
+  "description": "Reads a customer feedback message and classifies it as CRITICAL / WARNING / POSITIVE, extracting structured details. Replies with JSON only.",
+  "instruction": { "$file": "instruction.md" },
+  "toolsets": [],
+  "visibility": "POD",
+  "permissions": { "grants": [] }
+}

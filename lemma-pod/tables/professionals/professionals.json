@@ -1,0 +1,21 @@
+{
+  // GigOps "Datastore" — service professional profiles.
+  "name": "professionals",
+  "primary_key_column": "id",
+  "enable_rls": false,
+  "visibility": "POD",
+  "columns": [
+    { "name": "key", "type": "TEXT", "required": true, "max_length": 32 },
+    { "name": "name", "type": "TEXT", "required": true, "max_length": 120 },
+    { "name": "city", "type": "TEXT", "required": true, "max_length": 80 },
+    { "name": "service_types", "type": "JSON" },
+    { "name": "quality_score", "type": "FLOAT", "required": true },
+    { "name": "total_bookings", "type": "INTEGER", "required": true },
+    { "name": "active_complaints", "type": "INTEGER", "required": true },
+    { "name": "status", "type": "ENUM", "required": true, "default": "active",
+      "options": ["active", "flagged", "under-review", "deactivated"] },
+    { "name": "joined_date", "type": "DATE" },
+    { "name": "last_service_date", "type": "DATE" }
+  ],
+  "config": {}
+}

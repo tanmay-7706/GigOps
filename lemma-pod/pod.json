@@ -1,0 +1,5 @@
+{
+  "format_version": 2,
+  "name": "gigops",
+  "description": "GigOps — AI operations desk for a home-services gig-workforce platform. Triages customer feedback (CRITICAL/WARNING/POSITIVE), drafts the operational action, and maintains live professional quality scores."
+}

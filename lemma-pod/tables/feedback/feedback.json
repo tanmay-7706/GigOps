@@ -1,0 +1,24 @@
+{
+  // GigOps "Document Store" — customer feedback + attached triage/action results.
+  "name": "feedback",
+  "primary_key_column": "id",
+  "enable_rls": false,
+  "visibility": "POD",
+  "columns": [
+    { "name": "key", "type": "TEXT", "required": true, "max_length": 32 },
+    { "name": "professional_key", "type": "TEXT", "required": true, "max_length": 32 },
+    { "name": "professional_name", "type": "TEXT", "max_length": 120 },
+    { "name": "customer_name", "type": "TEXT", "max_length": 120 },
+    { "name": "service_type", "type": "TEXT", "max_length": 80 },
+    { "name": "booking_date", "type": "DATE" },
+    { "name": "feedback_text", "type": "TEXT", "max_length": 2000 },
+    { "name": "submitted_at", "type": "DATETIME" },
+    { "name": "status", "type": "ENUM", "required": true, "default": "pending",
+      "options": ["pending", "triaged", "actioned", "resolved"] },
+    { "name": "severity", "type": "TEXT", "max_length": 16 },
+    { "name": "triage_result", "type": "JSON" },
+    { "name": "action_draft", "type": "JSON" },
+    { "name": "approved_message", "type": "TEXT", "max_length": 2000 }
+  ],
+  "config": {}
+}
