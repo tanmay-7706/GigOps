@@ -24,6 +24,23 @@ Everything operational lives in a **Lemma pod** (`gigops`):
 | **Table** `feedback` | the Document Store — customer feedback + attached triage/action |
 | **Agent** `triage` | classifies feedback → `{severity, issueType, keyDetails, confidence}` |
 | **Agent** `action` | drafts → `{actionType, escalationMessage, internalNote, scoreAdjustment}` |
+| **Agent** `ops` | read-only chat assistant — answers "who's at-risk?" by querying the tables |
+| **Function** `apply_triage` | deterministic write-back of a triage result |
+| **Workflow** `gigops_triage` | human-in-the-loop: `intake → triage agent → manager-approval form → end` |
+| **Workflow** `auto_triage` | autonomous: `feedback insert → triage agent → apply_triage function → end` |
+| **Schedule** `auto_triage_on_insert` | DATASTORE trigger — auto-triages every new feedback row |
+| **Surface** `whatsapp` | exposes the `ops` agent on Lemma's managed WhatsApp number |
+
+## What makes it stand out
+- **Autonomous triage** — insert a feedback row and the schedule → `auto_triage`
+  workflow classifies and writes it back in seconds, no human in the loop.
+- **Human-in-the-loop workflow** — `gigops_triage` runs the agent then pauses at a
+  manager-approval form (functions + agents + humans in one Lemma graph).
+- **Text the bot** — message the WhatsApp number and the `ops` agent answers team-health
+  questions ("most at-risk pros?", "critical escalations?") straight from chat — the ops
+  manager never has to open a dashboard.
+- **At-risk early warning** — every professional has a profile page (`/professionals/:id`)
+  with a HIGH/WATCH/HEALTHY risk banner, reasons, and full feedback history.
 
 The pod definition is an importable bundle in [`lemma-pod/`](lemma-pod). Agents
 run on Lemma's built-in runtime. The Next.js server talks to the pod over Lemma's
