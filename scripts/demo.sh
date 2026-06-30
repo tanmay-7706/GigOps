@@ -7,7 +7,8 @@
 #   2. run the triage workflow    5. approve that action
 #   3. show triaged feedback      6. dashboard stats (after)
 #
-# Requires GROQ_API_KEY in the server's environment for live classification.
+# Requires the Lemma pod (LEMMA_POD_ID) + `lemma auth login`. Run `npm run
+# lemma:reset` first for a clean pending state.
 # Usage:  npm run dev   # in one terminal
 #         ./scripts/demo.sh [base_url]      (default http://localhost:3000)
 # -----------------------------------------------------------------------------
