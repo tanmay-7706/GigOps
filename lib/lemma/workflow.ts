@@ -1,60 +1,50 @@
 // lib/lemma/workflow.ts
-// -----------------------------------------------------------------------------
-// gigops-triage-workflow — orchestrates the Triage Agent and Action Agent over
-// every pending feedback document, updates the stores, and is fully traced
-// through Lemma (observability). One failed feedback never kills the run.
+// gigops-triage-workflow — runs the Lemma triage + action agents over every
+// pending feedback row in the Lemma pod, writes the results back to the feedback
+// table, and updates each professional's complaint count + flag status.
 //
-// Steps per the spec:
-//   1. FETCH all "pending" feedback.
-//   2. FOR EACH:
-//      a. Triage Agent  -> TriageResult
-//      b. Action Agent  -> ActionDraft
-//      c. Attach both to the feedback doc; set status = "triaged".
-//      d. Update the professional: activeComplaints += 1 (CRITICAL/WARNING),
-//         and flag them on CRITICAL (unless already under-review/deactivated).
-//   3. RETURN { processed, results, failed }.
-// -----------------------------------------------------------------------------
+// Orchestration lives here (the app driving Lemma agents directly is the
+// idiomatic pattern — Lemma functions are reserved for deterministic work).
+// One feedback failing never kills the run.
 
 import type { TriageResult, ActionDraft, WorkflowResult } from "@/types";
-import { withWorkflowTrace, withSpan } from "./config";
-import { getFeedbackByStatus, updateFeedback } from "./documentStore";
-import { getProfessionalById, updateProfessional } from "./datastore";
+import { listRecords, updateRecord } from "./lemmaRest";
 import { runTriageAgent } from "./agents/triageAgent";
 import { runActionAgent } from "./agents/actionAgent";
 
+const CONCURRENCY = 4;
+
 export async function runTriageWorkflow(): Promise<WorkflowResult> {
-  return withWorkflowTrace("gigops-triage-workflow", {}, async (trace) => {
-    const pending = await withSpan(
-      trace,
-      "fetch-pending-feedback",
-      {},
-      () => getFeedbackByStatus("pending")
-    );
+  const [feedback, professionals] = await Promise.all([
+    listRecords("feedback"),
+    listRecords("professionals"),
+  ]);
+  const pending = feedback.filter((f) => f.status === "pending");
+  console.log(`[lemma:workflow] processing ${pending.length} pending feedback rows`);
 
-    console.log(`[workflow] processing ${pending.length} pending feedback entries`);
+  const results: TriageResult[] = [];
+  const failed: { feedbackId: string; error: string }[] = [];
+  // Aggregate per-professional changes so parallel feedback never races on the
+  // same professional row.
+  const proDeltas = new Map<string, { complaints: number; critical: boolean }>();
 
-    const results: TriageResult[] = [];
-    const failed: { feedbackId: string; error: string }[] = [];
-
-    for (const feedback of pending) {
+  let cursor = 0;
+  async function worker() {
+    while (cursor < pending.length) {
+      const f = pending[cursor++];
+      const fkey = String(f.key);
       try {
-        // a. Triage Agent
-        const triageOut = await withSpan(
-          trace,
-          "triage-agent",
-          { "feedback.id": feedback.id, "professional.id": feedback.professionalId },
-          () =>
-            runTriageAgent({
-              feedbackText: feedback.feedbackText,
-              professionalName: feedback.professionalName,
-              serviceType: feedback.serviceType,
-            })
-        );
+        const triageOut = await runTriageAgent({
+          feedbackText: String(f.feedback_text),
+          professionalName: String(f.professional_name),
+          serviceType: String(f.service_type),
+        });
+        const severity = triageOut.severity;
 
         const triageResult: TriageResult = {
-          feedbackId: feedback.id,
-          professionalId: feedback.professionalId,
-          severity: triageOut.severity,
+          feedbackId: fkey,
+          professionalId: String(f.professional_key),
+          severity,
           issueType: triageOut.issueType,
           keyDetails: triageOut.keyDetails,
           confidence: triageOut.confidence,
@@ -62,23 +52,15 @@ export async function runTriageWorkflow(): Promise<WorkflowResult> {
           processedAt: new Date().toISOString(),
         };
 
-        // b. Action Agent
-        const actionOut = await withSpan(
-          trace,
-          "action-agent",
-          { "feedback.id": feedback.id, severity: triageResult.severity },
-          () =>
-            runActionAgent({
-              severity: triageResult.severity,
-              issueType: triageResult.issueType,
-              keyDetails: triageResult.keyDetails,
-              professionalName: feedback.professionalName,
-              customerName: feedback.customerName,
-            })
-        );
-
+        const actionOut = await runActionAgent({
+          severity,
+          issueType: triageOut.issueType,
+          keyDetails: triageOut.keyDetails,
+          professionalName: String(f.professional_name),
+          customerName: String(f.customer_name),
+        });
         const actionDraft: ActionDraft = {
-          feedbackId: feedback.id,
+          feedbackId: fkey,
           actionType: actionOut.actionType,
           escalationMessage: actionOut.escalationMessage,
           internalNote: actionOut.internalNote,
@@ -86,67 +68,48 @@ export async function runTriageWorkflow(): Promise<WorkflowResult> {
           createdAt: new Date().toISOString(),
         };
 
-        // c. Attach results to the feedback document; mark triaged.
-        await withSpan(
-          trace,
-          "update-feedback-document",
-          { "feedback.id": feedback.id },
-          () =>
-            updateFeedback(feedback.id, {
-              triageResult,
-              actionDraft,
-              status: "triaged",
-            })
-        );
+        await updateRecord("feedback", f.id, {
+          status: "triaged",
+          severity,
+          triage_result: triageResult,
+          action_draft: actionDraft,
+        });
 
-        // d. Update the professional profile.
-        await withSpan(
-          trace,
-          "update-professional-profile",
-          { "professional.id": feedback.professionalId, severity: triageResult.severity },
-          async () => {
-            const prof = await getProfessionalById(feedback.professionalId);
-            if (!prof) return;
-
-            const isComplaint =
-              triageResult.severity === "CRITICAL" || triageResult.severity === "WARNING";
-            const patch: Partial<typeof prof> = {};
-
-            if (isComplaint) {
-              patch.activeComplaints = prof.activeComplaints + 1;
-            }
-            // CRITICAL flags the professional, unless they're already in a more
-            // serious state (under-review) or deactivated.
-            if (
-              triageResult.severity === "CRITICAL" &&
-              prof.status !== "under-review" &&
-              prof.status !== "deactivated"
-            ) {
-              patch.status = "flagged";
-            }
-
-            if (Object.keys(patch).length > 0) {
-              await updateProfessional(feedback.professionalId, patch);
-            }
-          }
-        );
+        const pk = String(f.professional_key);
+        const d = proDeltas.get(pk) ?? { complaints: 0, critical: false };
+        if (severity === "CRITICAL" || severity === "WARNING") d.complaints += 1;
+        if (severity === "CRITICAL") d.critical = true;
+        proDeltas.set(pk, d);
 
         results.push(triageResult);
-        console.log(
-          `[workflow] ✓ ${feedback.id} -> ${triageResult.severity} (${actionDraft.actionType})`
-        );
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error(`[workflow] ✗ ${feedback.id} failed: ${message}`);
-        failed.push({ feedbackId: feedback.id, error: message });
-        // Continue with the rest — one failure must not kill the workflow.
+        console.log(`[lemma:workflow] ✓ ${fkey} -> ${severity} (${actionDraft.actionType})`);
+      } catch (e) {
+        const error = e instanceof Error ? e.message : String(e);
+        failed.push({ feedbackId: fkey, error });
+        console.error(`[lemma:workflow] ✗ ${fkey}: ${error}`);
       }
     }
+  }
 
-    console.log(
-      `[workflow] done — processed ${results.length}, failed ${failed.length}`
-    );
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, pending.length || 1) }, worker)
+  );
 
-    return { processed: results.length, results, failed };
-  });
+  // Apply aggregated professional updates sequentially (safe, no races).
+  const proByKey = new Map(professionals.map((p) => [String(p.key), p]));
+  for (const [pk, d] of proDeltas) {
+    const p = proByKey.get(pk);
+    if (!p) continue;
+    const fields: Record<string, unknown> = {};
+    if (d.complaints > 0) {
+      fields.active_complaints = Number(p.active_complaints ?? 0) + d.complaints;
+    }
+    if (d.critical && p.status !== "under-review" && p.status !== "deactivated") {
+      fields.status = "flagged";
+    }
+    if (Object.keys(fields).length) await updateRecord("professionals", String(p.id), fields);
+  }
+
+  console.log(`[lemma:workflow] done — processed ${results.length}, failed ${failed.length}`);
+  return { processed: results.length, results, failed };
 }
