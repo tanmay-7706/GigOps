@@ -1,0 +1,13 @@
+{
+  "name": "ops",
+  "description": "GigOps operations assistant — answers an area manager's questions about professionals, feedback, and escalations straight from chat (WhatsApp / Telegram / Slack).",
+  "instruction": { "$file": "instruction.md" },
+  "toolsets": ["POD"],
+  "visibility": "POD",
+  "permissions": { "grants": [
+    { "resource_type": "datastore_table", "resource_name": "professionals",
+      "permission_ids": ["datastore.table.read", "datastore.record.read"] },
+    { "resource_type": "datastore_table", "resource_name": "feedback",
+      "permission_ids": ["datastore.table.read", "datastore.record.read"] }
+  ] }
+}

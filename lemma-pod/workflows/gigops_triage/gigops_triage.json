@@ -1,0 +1,68 @@
+{
+  "name": "gigops_triage",
+  "description": "Human-in-the-loop feedback triage: collect a customer feedback, let the Triage agent classify it (CRITICAL/WARNING/POSITIVE), then route to an ops manager to approve the recommended action. Demonstrates agents + humans collaborating in one Lemma workflow.",
+  "start": { "type": "MANUAL" },
+  "nodes": [
+    {
+      "id": "intake",
+      "type": "FORM",
+      "label": "New feedback",
+      "config": {
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "feedback_text": { "type": "string" },
+            "professional_name": { "type": "string" },
+            "service_type": { "type": "string" },
+            "customer_name": { "type": "string" }
+          },
+          "required": ["feedback_text", "professional_name", "service_type"]
+        }
+      }
+    },
+    {
+      "id": "triage",
+      "type": "AGENT",
+      "label": "Triage agent",
+      "config": {
+        "agent_name": "triage",
+        "input_mapping": {
+          "feedback_text": { "type": "expression", "value": "intake.feedback_text" },
+          "professional_name": { "type": "expression", "value": "intake.professional_name" },
+          "service_type": { "type": "expression", "value": "intake.service_type" }
+        }
+      }
+    },
+    {
+      "id": "review",
+      "type": "FORM",
+      "label": "Manager review",
+      "config": {
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "severity": {
+              "type": "string",
+              "default": { "type": "expression", "value": "triage.severity", "optional": true }
+            },
+            "recommended_action": {
+              "type": "string",
+              "default": { "type": "expression", "value": "triage.recommendedAction", "optional": true }
+            },
+            "approved": { "type": "boolean" },
+            "notes": { "type": "string" }
+          },
+          "required": ["approved"]
+        },
+        "ui_schema": { "ui:order": ["severity", "recommended_action", "approved", "notes"] }
+      }
+    },
+    { "id": "end", "type": "END", "label": "Done" }
+  ],
+  "edges": [
+    { "id": "e1", "source": "intake", "target": "triage" },
+    { "id": "e2", "source": "triage", "target": "review" },
+    { "id": "e3", "source": "review", "target": "end" }
+  ],
+  "visibility": "POD"
+}

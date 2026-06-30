@@ -183,9 +183,12 @@ export default function DashboardPage() {
                           )}
                         >
                           <td className="px-6 py-3">
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
+                            <Link
+                              href={`/professionals/${p.id}`}
+                              className="font-medium text-gray-900 hover:text-indigo-600 dark:text-gray-100 dark:hover:text-indigo-400"
+                            >
                               {p.name}
-                            </span>
+                            </Link>
                             <div className="text-xs text-gray-400">{p.city}</div>
                           </td>
                           <td className="px-6 py-3 text-gray-500 dark:text-gray-400">

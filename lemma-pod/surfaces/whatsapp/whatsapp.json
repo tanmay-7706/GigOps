@@ -1,0 +1,7 @@
+{
+  "name": "whatsapp",
+  "platform": "WHATSAPP",
+  "default_agent_name": "ops",
+  "credential_mode": "SYSTEM",
+  "is_enabled": true
+}
