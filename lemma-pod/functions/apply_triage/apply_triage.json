@@ -1,0 +1,11 @@
+{
+  "name": "apply_triage",
+  "description": "Deterministic write-back: given a triage classification, mark a feedback row triaged and store the structured result. Used by the auto_triage workflow.",
+  "type": "API",
+  "visibility": "POD",
+  "code": { "$file": "code.py" },
+  "permissions": { "grants": [
+    { "resource_type": "datastore_table", "resource_name": "feedback",
+      "permission_ids": ["datastore.table.read", "datastore.record.read", "datastore.record.write"] }
+  ] }
+}

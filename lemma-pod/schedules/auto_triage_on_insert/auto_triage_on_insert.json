@@ -1,0 +1,7 @@
+{
+  "name": "auto_triage_on_insert",
+  "schedule_type": "DATASTORE",
+  "config": { "table_name": "feedback", "operations": ["INSERT"] },
+  "workflow_name": "auto_triage",
+  "is_active": true
+}

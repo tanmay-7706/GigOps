@@ -4,5 +4,16 @@
   "instruction": { "$file": "instruction.md" },
   "toolsets": [],
   "visibility": "POD",
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "severity": { "type": "string", "enum": ["CRITICAL", "WARNING", "POSITIVE"] },
+      "issueType": { "type": "string" },
+      "keyDetails": { "type": "string" },
+      "confidence": { "type": "number" },
+      "recommendedAction": { "type": "string" }
+    },
+    "required": ["severity", "issueType", "keyDetails", "confidence", "recommendedAction"]
+  },
   "permissions": { "grants": [] }
 }

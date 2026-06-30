@@ -1,0 +1,45 @@
+{
+  "name": "auto_triage",
+  "description": "Event-driven autonomy: when a new feedback row is inserted, the Triage agent classifies it and the apply_triage function writes the result straight back — fully automatic, no human in the loop. Wired to the feedback table via the auto_triage_on_insert schedule.",
+  "start": {
+    "type": "DATASTORE_EVENT",
+    "config": { "table_name": "feedback", "operations": ["INSERT"] }
+  },
+  "nodes": [
+    {
+      "id": "triage",
+      "type": "AGENT",
+      "label": "Triage agent",
+      "config": {
+        "agent_name": "triage",
+        "input_mapping": {
+          "feedback_text": { "type": "expression", "value": "start.payload.feedback_text" },
+          "professional_name": { "type": "expression", "value": "start.payload.professional_name" },
+          "service_type": { "type": "expression", "value": "start.payload.service_type" }
+        }
+      }
+    },
+    {
+      "id": "apply",
+      "type": "FUNCTION",
+      "label": "Write result",
+      "config": {
+        "function_name": "apply_triage",
+        "input_mapping": {
+          "record_id": { "type": "expression", "value": "start.metadata.record_id" },
+          "severity": { "type": "expression", "value": "triage.severity" },
+          "issueType": { "type": "expression", "value": "triage.issueType" },
+          "keyDetails": { "type": "expression", "value": "triage.keyDetails" },
+          "confidence": { "type": "expression", "value": "triage.confidence" },
+          "recommendedAction": { "type": "expression", "value": "triage.recommendedAction" }
+        }
+      }
+    },
+    { "id": "end", "type": "END", "label": "Done" }
+  ],
+  "edges": [
+    { "id": "e1", "source": "triage", "target": "apply" },
+    { "id": "e2", "source": "apply", "target": "end" }
+  ],
+  "visibility": "POD"
+}
