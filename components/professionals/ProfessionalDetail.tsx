@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "motion/react";
 import {
   ArrowLeft,
   Loader2,
@@ -19,6 +20,9 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { QualityScore } from "@/components/shared/QualityScore";
 import { SeverityBadge } from "@/components/shared/SeverityBadge";
 import { TopNav } from "@/components/shared/TopNav";
+import { CountUp } from "@/components/motion/CountUp";
+import { Reveal } from "@/components/motion/Reveal";
+import { SpotlightCard } from "@/components/motion/SpotlightCard";
 import { cn } from "@/lib/utils";
 
 type ProfessionalWithHistory = ServiceProfessional & { feedbackHistory: CustomerFeedback[] };
@@ -113,9 +117,9 @@ export function ProfessionalDetail({ id }: { id: string }) {
   );
 
   const stats = [
-    { label: "Quality score", value: pro.qualityScore.toFixed(1), icon: Star, color: "text-green-600" },
-    { label: "Total bookings", value: pro.totalBookings, icon: CalendarCheck, color: "text-blue-600" },
-    { label: "Active complaints", value: pro.activeComplaints, icon: MessageSquareWarning, color: "text-red-600" },
+    { label: "Quality score", num: pro.qualityScore, decimals: 1, icon: Star, color: "text-green-600" },
+    { label: "Total bookings", num: pro.totalBookings, decimals: 0, icon: CalendarCheck, color: "text-blue-600" },
+    { label: "Active complaints", num: pro.activeComplaints, decimals: 0, icon: MessageSquareWarning, color: "text-red-600" },
   ];
 
   return (
@@ -140,8 +144,19 @@ export function ProfessionalDetail({ id }: { id: string }) {
         </p>
 
         {/* Risk banner — the early-warning signal */}
-        <div className={cn("mt-5 flex items-start gap-3 rounded-xl border p-4", ui.classes)}>
-          <ui.icon className="mt-0.5 h-5 w-5 shrink-0" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97, y: 6 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className={cn("mt-5 flex items-start gap-3 rounded-xl border p-4", ui.classes)}
+        >
+          <motion.span
+            animate={risk.level === "HIGH" ? { scale: [1, 1.15, 1] } : {}}
+            transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+            className="mt-0.5 shrink-0"
+          >
+            <ui.icon className="h-5 w-5" />
+          </motion.span>
           <div>
             <p className="font-semibold">{ui.label}</p>
             <ul className="mt-1 list-inside list-disc text-sm opacity-90">
@@ -150,21 +165,22 @@ export function ProfessionalDetail({ id }: { id: string }) {
               ))}
             </ul>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats */}
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
-            >
-              <div className="flex items-center gap-2">
-                <s.icon className={cn("h-5 w-5", s.color)} />
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{s.label}</span>
-              </div>
-              <p className="mt-2 text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100">{s.value}</p>
-            </div>
+          {stats.map((s, i) => (
+            <Reveal key={s.label} delay={0.08 + i * 0.06}>
+              <SpotlightCard className="p-5">
+                <div className="flex items-center gap-2">
+                  <s.icon className={cn("h-5 w-5", s.color)} />
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{s.label}</span>
+                </div>
+                <div className="mt-2 text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
+                  <CountUp value={s.num} decimals={s.decimals} />
+                </div>
+              </SpotlightCard>
+            </Reveal>
           ))}
         </div>
 
