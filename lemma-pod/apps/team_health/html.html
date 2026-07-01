@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GigOps — Team Health Board</title>
+    <style>
+      :root {
+        --bg: #f7f7f8; --card: #fff; --ink: #111827; --muted: #6b7280;
+        --line: #e5e7eb; --indigo: #4f46e5;
+        --red-bg: #fef2f2; --red-ink: #b91c1c; --red-line: #fecaca;
+        --amber-bg: #fffbeb; --amber-ink: #b45309; --amber-line: #fde68a;
+        --green-bg: #f0fdf4; --green-ink: #15803d; --green-line: #bbf7d0;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink);
+        font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+      header { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+      .logo { width: 30px; height: 30px; border-radius: 8px; background: var(--indigo);
+        display: grid; place-items: center; color: #fff; font-weight: 800; }
+      h1 { font-size: 26px; margin: 0; letter-spacing: -0.02em; }
+      .sub { color: var(--muted); margin: 2px 0 22px; font-size: 14px; }
+      .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+      .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+      .stat .k { color: var(--muted); font-size: 13px; font-weight: 600; }
+      .stat .v { font-size: 30px; font-weight: 800; margin-top: 6px; font-variant-numeric: tabular-nums; }
+      .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+      .card h2 { font-size: 16px; margin: 0; padding: 18px 20px 4px; }
+      .card .note { color: var(--muted); font-size: 13px; padding: 0 20px 14px; }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; }
+      th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase;
+        letter-spacing: .04em; padding: 8px 20px; border-bottom: 1px solid var(--line); }
+      td { padding: 12px 20px; border-bottom: 1px solid #f3f4f6; }
+      tr:last-child td { border-bottom: 0; }
+      tr.risk td { background: #fff8f1; }
+      .name { font-weight: 600; }
+      .city { color: var(--muted); font-size: 12px; }
+      .pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 10px;
+        font-size: 12px; font-weight: 700; border: 1px solid transparent; text-transform: capitalize; }
+      .score { font-weight: 800; border-radius: 8px; padding: 3px 9px; font-variant-numeric: tabular-nums; }
+      .red { background: var(--red-bg); color: var(--red-ink); border-color: var(--red-line); }
+      .amber { background: var(--amber-bg); color: var(--amber-ink); border-color: var(--amber-line); }
+      .green { background: var(--green-bg); color: var(--green-ink); border-color: var(--green-line); }
+      .esc { display: block; border: 1px solid var(--red-line); background: var(--red-bg);
+        border-radius: 10px; padding: 12px; margin: 0 16px 12px; }
+      .esc .who { font-weight: 700; }
+      .esc .txt { color: #7f1d1d; font-size: 13px; margin-top: 4px; }
+      .empty { color: var(--muted); font-size: 14px; padding: 12px 20px 22px; }
+      .center { min-height: 60vh; display: grid; place-items: center; }
+      .badge { font-size: 11px; font-weight: 800; letter-spacing: .04em; }
+      @media (max-width: 820px) { .stats { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div id="app"><div class="center">Loading the Team Health Board…</div></div>
+
+    <script>
+      (function () {
+        var cfg = window.__LEMMA_CONFIG__ || {};
+        var base = (cfg.apiUrl || window.location.origin).replace(/\/$/, "");
+        var s = document.createElement("script");
+        s.src = base + "/public/sdk/lemma-client.js";
+        s.onload = boot;
+        s.onerror = function () { fatal("Couldn't load the Lemma SDK from " + s.src); };
+        document.head.appendChild(s);
+      })();
+
+      var client;
+      function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+      function listOf(r){ return (r && (r.items || r.data)) || (Array.isArray(r)?r:[]); }
+      function col(r,k){ return (r && r.data && r.data[k]!=null) ? r.data[k] : (r ? r[k] : undefined); }
+      function num(v){ var n=Number(v); return isFinite(n)?n:0; }
+      function fatal(m){ document.getElementById("app").innerHTML='<div class="center"><div><h1>⚠</h1><p>'+esc(m)+'</p></div></div>'; }
+
+      function scoreClass(s){ return s<3.5?"red":(s<=4.0?"amber":"green"); }
+      function statusClass(st){ return st==="active"?"green":(st==="deactivated"?"red":"amber"); }
+      function sevClass(sv){ return sv==="CRITICAL"?"red":(sv==="WARNING"?"amber":"green"); }
+      function isRisk(p){ var st=col(p,"status"); return st==="flagged"||st==="under-review"||num(col(p,"quality_score"))<3.8||num(col(p,"active_complaints"))>=2; }
+
+      async function boot(){
+        try{
+          client = new window.LemmaClient.LemmaClient();
+          var auth = await client.initialize();
+          if(auth.status!=="authenticated"){
+            document.getElementById("app").innerHTML='<div class="center"><div><h1>GigOps</h1><p>Sign in to open the board.</p><button id="si">Sign in</button></div></div>';
+            document.getElementById("si").onclick=function(){ client.auth.redirectToAuth(); };
+            return;
+          }
+          var pros = listOf(await client.records.list("professionals", { limit: 500 }));
+          var feed = listOf(await client.records.list("feedback", { limit: 500 }));
+          render(pros, feed);
+        }catch(e){ fatal((e&&e.message)||"Something went wrong."); }
+      }
+
+      function render(pros, feed){
+        pros = pros.slice().sort(function(a,b){ return num(col(a,"quality_score"))-num(col(b,"quality_score")); });
+        var pending = feed.filter(function(f){ return col(f,"status")==="pending"; }).length;
+        var escalations = feed.filter(function(f){ return col(f,"status")==="triaged" && col(f,"severity")==="CRITICAL"; });
+        var avg = pros.length ? (pros.reduce(function(s,p){ return s+num(col(p,"quality_score")); },0)/pros.length) : 0;
+
+        var stats = [
+          ["Total Professionals", pros.length],
+          ["Pending Feedback", pending],
+          ["Active Escalations", escalations.length],
+          ["Avg Quality Score", avg.toFixed(1)],
+        ].map(function(x){ return '<div class="stat"><div class="k">'+x[0]+'</div><div class="v">'+x[1]+'</div></div>'; }).join("");
+
+        var rows = pros.map(function(p){
+          var sc=num(col(p,"quality_score")), st=col(p,"status")||"active";
+          var svc=col(p,"service_types"); svc=Array.isArray(svc)?svc.join(", "):(svc||"");
+          return '<tr class="'+(isRisk(p)?"risk":"")+'">'+
+            '<td><div class="name">'+esc(col(p,"name"))+'</div><div class="city">'+esc(col(p,"city"))+'</div></td>'+
+            '<td class="city">'+esc(svc)+'</td>'+
+            '<td><span class="score '+scoreClass(sc)+'">'+sc.toFixed(1)+'</span></td>'+
+            '<td>'+num(col(p,"active_complaints"))+'</td>'+
+            '<td><span class="pill '+statusClass(st)+'">'+esc(st)+'</span></td></tr>';
+        }).join("");
+
+        var escHtml = escalations.length ? escalations.map(function(f){
+          var tr=col(f,"triage_result")||{}; var detail=(tr&&tr.keyDetails)||col(f,"feedback_text")||"";
+          return '<div class="esc"><div style="display:flex;justify-content:space-between;align-items:center">'+
+            '<span class="who">'+esc(col(f,"professional_name"))+'</span>'+
+            '<span class="pill red badge">CRITICAL</span></div>'+
+            '<div class="txt">'+esc(detail)+'</div></div>';
+        }).join("") : '<div class="empty">No critical escalations. Run triage to surface them.</div>';
+
+        document.getElementById("app").innerHTML =
+          '<div class="wrap">'+
+            '<header><div class="logo">◧</div><h1>Team Health Board</h1></header>'+
+            '<div class="sub">GigOps · live from the Lemma pod — professional quality, escalations, team performance</div>'+
+            '<div class="stats">'+stats+'</div>'+
+            '<div class="grid">'+
+              '<div class="card"><h2>Service Professionals</h2><div class="note">Sorted by quality score — most at-risk first</div>'+
+                '<table><thead><tr><th>Professional</th><th>Services</th><th>Score</th><th>Complaints</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+              '<div class="card"><h2>Pending Escalations</h2><div class="note">Critical cases awaiting approval</div>'+escHtml+'</div>'+
+            '</div>'+
+          '</div>';
+      }
+    </script>
+  </body>
+</html>

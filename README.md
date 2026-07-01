@@ -30,6 +30,7 @@ Everything operational lives in a **Lemma pod** (`gigops`):
 | **Workflow** `auto_triage` | autonomous: `feedback insert → triage agent → apply_triage function → end` |
 | **Schedule** `auto_triage_on_insert` | DATASTORE trigger — auto-triages every new feedback row |
 | **Surface** `whatsapp` | exposes the `ops` agent on Lemma's managed WhatsApp number |
+| **App** `team_health` | a Lemma-hosted Team Health Board — [team-health.apps.lemma.work](https://team-health.apps.lemma.work) |
 
 ## What makes it stand out
 - **Autonomous triage** — insert a feedback row and the schedule → `auto_triage`
@@ -46,6 +47,11 @@ The pod definition is an importable bundle in [`lemma-pod/`](lemma-pod). Agents
 run on Lemma's built-in runtime. The Next.js server talks to the pod over Lemma's
 REST API (`lib/lemma/lemmaRest.ts`); auth is handled by the Lemma CLI and tokens
 auto-refresh — no API key in the app.
+
+Two operator surfaces run on the pod: the polished **Next.js dashboard**
+(`localhost:3000`) and a **Lemma-hosted HTML app** ([`team_health`](lemma-pod/apps/team_health/html.html))
+at **team-health.apps.lemma.work** (redeploy with
+`lemma apps deploy team_health ./lemma-pod/apps/team_health/html.html --pod gigops`).
 
 ## Stack
 - Next.js 16 (App Router) + TypeScript · Tailwind CSS + shadcn
