@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "motion/react";
 import {
   ArrowLeft,
   Loader2,
@@ -221,28 +222,35 @@ export function FeedbackDetail({ id }: { id: string }) {
           <div className="mt-6 flex flex-wrap items-center justify-end gap-4">
             {error && <span className="text-sm text-red-600">{error}</span>}
             {result && (
-              <span className="text-sm font-medium text-green-700 dark:text-green-400">
+              <motion.span
+                initial={{ opacity: 0, scale: 0.9, x: 8 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 24 }}
+                className="text-sm font-medium text-green-700 dark:text-green-400"
+              >
                 Applied — score now {result.updatedScore.toFixed(1)} · status {result.updatedStatus}
-              </span>
+              </motion.span>
             )}
-            <Button
-              size="lg"
-              onClick={handleApprove}
-              disabled={approving || isActioned}
-              className="bg-indigo-600 text-white hover:bg-indigo-500"
-            >
-              {approving ? (
-                <>
-                  <Loader2 className="animate-spin" /> Applying…
-                </>
-              ) : isActioned ? (
-                <>
-                  <CheckCircle2 /> Action Approved
-                </>
-              ) : (
-                "Approve Action"
-              )}
-            </Button>
+            <motion.div whileTap={{ scale: 0.96 }}>
+              <Button
+                size="lg"
+                onClick={handleApprove}
+                disabled={approving || isActioned}
+                className="bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500"
+              >
+                {approving ? (
+                  <>
+                    <Loader2 className="animate-spin" /> Applying…
+                  </>
+                ) : isActioned ? (
+                  <>
+                    <CheckCircle2 /> Action Approved
+                  </>
+                ) : (
+                  "Approve Action"
+                )}
+              </Button>
+            </motion.div>
           </div>
         )}
       </div>
