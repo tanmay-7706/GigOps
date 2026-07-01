@@ -6,32 +6,35 @@ interface SeverityBadgeProps {
   className?: string;
 }
 
-const severityConfig: Record<Severity, { label: string; classes: string }> = {
+const severityConfig: Record<Severity, { label: string; classes: string; dot: string }> = {
   CRITICAL: {
     label: "Critical",
-    classes: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
+    classes: "bg-[#EF4444]/12 text-[#DC2626] dark:text-[#F87171]",
+    dot: "bg-[#EF4444]",
   },
   WARNING: {
     label: "Warning",
-    classes: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
+    classes: "bg-[#F59E0B]/15 text-[#B45309] dark:text-[#FBBF24]",
+    dot: "bg-[#F59E0B]",
   },
   POSITIVE: {
     label: "Positive",
-    classes: "bg-green-100 text-green-800 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
+    classes: "bg-[#10B981]/14 text-[#047857] dark:text-[#34D399]",
+    dot: "bg-[#10B981]",
   },
 };
 
 export function SeverityBadge({ severity, className }: SeverityBadgeProps) {
   const config = severityConfig[severity];
-
   return (
     <span
       className={clsx(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide",
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide",
         config.classes,
         className
       )}
     >
+      <span className={clsx("h-1.5 w-1.5 rounded-full", config.dot)} />
       {config.label}
     </span>
   );

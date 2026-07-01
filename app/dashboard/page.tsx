@@ -12,17 +12,8 @@ import {
   Loader2,
   ChevronRight,
 } from "lucide-react";
-import type {
-  ServiceProfessional,
-  CustomerFeedback,
-  DashboardStats,
-} from "@/types";
-import {
-  getProfessionals,
-  getFeedback,
-  getDashboardStats,
-  runTriageWorkflow,
-} from "@/lib/api";
+import type { ServiceProfessional, CustomerFeedback, DashboardStats } from "@/types";
+import { getProfessionals, getFeedback, getDashboardStats, runTriageWorkflow } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -45,11 +36,7 @@ export default function DashboardPage() {
   const [runMessage, setRunMessage] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    return Promise.all([
-      getDashboardStats(),
-      getProfessionals(),
-      getFeedback(),
-    ]).then(([s, p, f]) => {
+    return Promise.all([getDashboardStats(), getProfessionals(), getFeedback()]).then(([s, p, f]) => {
       if (s.success) setStats(s.data);
       if (p.success) setProfessionals(p.data);
       if (f.success) setFeedback(f.data);
@@ -83,32 +70,32 @@ export default function DashboardPage() {
   );
 
   const statCards = [
-    { label: "Total Professionals", num: stats?.totalProfessionals ?? 0, decimals: 0, icon: Users, color: "text-blue-600" },
-    { label: "Pending Feedbacks", num: stats?.pendingFeedbacks ?? 0, decimals: 0, icon: MessageSquareWarning, color: "text-amber-600" },
-    { label: "Active Escalations", num: stats?.activeEscalations ?? 0, decimals: 0, icon: AlertTriangle, color: "text-red-600" },
-    { label: "Avg Quality Score", num: stats?.avgQualityScore ?? 0, decimals: 1, icon: Star, color: "text-green-600" },
+    { label: "Total Professionals", num: stats?.totalProfessionals ?? 0, decimals: 0, icon: Users, orb: "from-[#60A5FA] to-[#2563EB]" },
+    { label: "Pending Feedbacks", num: stats?.pendingFeedbacks ?? 0, decimals: 0, icon: MessageSquareWarning, orb: "from-[#FBBF24] to-[#F59E0B]" },
+    { label: "Active Escalations", num: stats?.activeEscalations ?? 0, decimals: 0, icon: AlertTriangle, orb: "from-[#FB7185] to-[#EF4444]" },
+    { label: "Avg Quality Score", num: stats?.avgQualityScore ?? 0, decimals: 1, icon: Star, orb: "from-[#34D399] to-[#10B981]" },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen">
       <TopNav />
-      <div className="mx-auto max-w-7xl p-6">
+      <div className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6">
         {/* Header */}
         <Reveal>
-          <div className="mb-2 flex flex-wrap items-start justify-between gap-4">
+          <div className="mb-2 flex flex-wrap items-end justify-between gap-5">
             <div>
-              <div className="mb-1 inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <div className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-clay-muted">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-clay-success opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-clay-success" />
                 </span>
                 <ShinyText>Live · Lemma pod</ShinyText>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="font-heading text-4xl font-black tracking-tight sm:text-5xl md:text-6xl">
                 <GradientText>Team Health Board</GradientText>
               </h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Monitor professional quality, pending escalations, and team performance
+              <p className="mt-2 max-w-xl text-base font-medium text-clay-muted">
+                Monitor professional quality, pending escalations, and team performance.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -118,46 +105,39 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, x: 8 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0 }}
-                    className="text-sm font-medium text-gray-600 dark:text-gray-400"
+                    className="text-sm font-bold text-clay-muted"
                   >
                     {runMessage}
                   </motion.span>
                 )}
               </AnimatePresence>
-              <motion.div whileTap={{ scale: 0.96 }}>
-                <Button
-                  size="lg"
-                  onClick={handleRunWorkflow}
-                  disabled={running}
-                  className="bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500"
-                >
-                  {running ? (
-                    <>
-                      <Loader2 className="animate-spin" /> Running triage…
-                    </>
-                  ) : (
-                    <>
-                      <Play /> Run Triage Workflow
-                    </>
-                  )}
-                </Button>
-              </motion.div>
+              <Button size="lg" onClick={handleRunWorkflow} disabled={running}>
+                {running ? (
+                  <>
+                    <Loader2 className="animate-spin" /> Running triage…
+                  </>
+                ) : (
+                  <>
+                    <Play /> Run Triage Workflow
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </Reveal>
 
-        {/* Indeterminate progress while running */}
-        <div className="mb-6 h-0.5 overflow-hidden rounded-full">
+        {/* Progress while running */}
+        <div className="mb-7 mt-5 h-1 overflow-hidden rounded-full">
           <AnimatePresence>
             {running && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="h-full w-full rounded-full bg-indigo-500/15"
+                className="h-full w-full rounded-full bg-clay-accent/15"
               >
                 <motion.div
-                  className="h-full w-1/3 rounded-full bg-indigo-500"
+                  className="h-full w-1/3 rounded-full bg-gradient-to-r from-[#A78BFA] to-[#7C3AED]"
                   animate={{ x: ["-100%", "320%"] }}
                   transition={{ repeat: Infinity, duration: 1.1, ease: "linear" }}
                 />
@@ -167,22 +147,21 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-8 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
           {statCards.map((stat, i) => (
             <Reveal key={stat.label} delay={0.05 + i * 0.06}>
-              <SpotlightCard className="p-5">
-                <div className="flex items-center gap-3">
-                  <stat.icon className={cn("h-5 w-5", stat.color)} />
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {stat.label}
-                  </span>
-                </div>
-                <div className="mt-2 text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
-                  {loading ? (
-                    <Skeleton className="h-9 w-16" />
-                  ) : (
-                    <CountUp value={stat.num} decimals={stat.decimals} />
+              <SpotlightCard className="p-5 sm:p-6">
+                <div
+                  className={cn(
+                    "mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-clayButton",
+                    stat.orb
                   )}
+                >
+                  <stat.icon className="h-6 w-6" />
+                </div>
+                <div className="text-sm font-bold text-clay-muted">{stat.label}</div>
+                <div className="mt-1 font-heading text-4xl font-black tabular-nums text-clay-fg sm:text-5xl">
+                  {loading ? <Skeleton className="mt-1 h-10 w-20" /> : <CountUp value={stat.num} decimals={stat.decimals} />}
                 </div>
               </SpotlightCard>
             </Reveal>
@@ -193,30 +172,28 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Professionals Table */}
           <Reveal delay={0.15} className="lg:col-span-2">
-            <div className="rounded-xl border border-border bg-card shadow-sm">
-              <div className="border-b border-border p-6">
-                <h2 className="text-lg font-semibold">Service Professionals</h2>
-                <p className="text-sm text-muted-foreground">
-                  Sorted by quality score — most at-risk first
-                </p>
+            <div className="overflow-hidden rounded-[32px] border border-white/50 bg-clay-card shadow-clayCard backdrop-blur-xl dark:border-white/10">
+              <div className="p-7">
+                <h2 className="font-heading text-xl font-extrabold text-clay-fg">Service Professionals</h2>
+                <p className="text-sm font-medium text-clay-muted">Sorted by quality score — most at-risk first</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="text-xs uppercase tracking-wide text-gray-400">
-                    <tr className="border-b border-border">
-                      <th className="px-6 py-3 font-medium">Professional</th>
-                      <th className="px-6 py-3 font-medium">Services</th>
-                      <th className="px-6 py-3 font-medium">Score</th>
-                      <th className="px-6 py-3 font-medium">Complaints</th>
-                      <th className="px-6 py-3 font-medium">Status</th>
+                  <thead className="text-xs font-bold uppercase tracking-wider text-clay-muted">
+                    <tr className="border-b border-clay-line">
+                      <th className="px-7 py-3">Professional</th>
+                      <th className="px-7 py-3">Services</th>
+                      <th className="px-7 py-3">Score</th>
+                      <th className="px-7 py-3">Complaints</th>
+                      <th className="px-7 py-3">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loading
                       ? Array.from({ length: 5 }).map((_, i) => (
-                          <tr key={i} className="border-b border-gray-50 dark:border-gray-800/50">
-                            <td className="px-6 py-4" colSpan={5}>
-                              <Skeleton className="h-6 w-full" />
+                          <tr key={i} className="border-b border-clay-line/60">
+                            <td className="px-7 py-4" colSpan={5}>
+                              <Skeleton className="h-7 w-full" />
                             </td>
                           </tr>
                         ))
@@ -229,29 +206,25 @@ export default function DashboardPage() {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: i * 0.04, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                               className={cn(
-                                "border-b border-gray-50 transition-colors last:border-0 hover:bg-gray-50 dark:border-gray-800/50 dark:hover:bg-gray-800/40",
-                                atRisk && "bg-amber-50/40 dark:bg-amber-950/10"
+                                "border-b border-clay-line/60 transition-colors last:border-0 hover:bg-clay-accent/[0.04]",
+                                atRisk && "bg-clay-warning/[0.06]"
                               )}
                             >
-                              <td className="px-6 py-3">
+                              <td className="px-7 py-4">
                                 <Link
                                   href={`/professionals/${p.id}`}
-                                  className="font-medium text-gray-900 transition-colors hover:text-indigo-600 dark:text-gray-100 dark:hover:text-indigo-400"
+                                  className="font-bold text-clay-fg transition-colors hover:text-clay-accent"
                                 >
                                   {p.name}
                                 </Link>
-                                <div className="text-xs text-gray-400">{p.city}</div>
+                                <div className="text-xs font-medium text-clay-muted">{p.city}</div>
                               </td>
-                              <td className="px-6 py-3 text-muted-foreground">
-                                {p.serviceTypes.join(", ")}
-                              </td>
-                              <td className="px-6 py-3">
+                              <td className="px-7 py-4 font-medium text-clay-muted">{p.serviceTypes.join(", ")}</td>
+                              <td className="px-7 py-4">
                                 <QualityScore score={p.qualityScore} />
                               </td>
-                              <td className="px-6 py-3 tabular-nums text-gray-700 dark:text-gray-300">
-                                {p.activeComplaints}
-                              </td>
-                              <td className="px-6 py-3">
+                              <td className="px-7 py-4 font-bold tabular-nums text-clay-fg">{p.activeComplaints}</td>
+                              <td className="px-7 py-4">
                                 <StatusBadge status={p.status} />
                               </td>
                             </motion.tr>
@@ -265,22 +238,22 @@ export default function DashboardPage() {
 
           {/* Escalations Sidebar */}
           <Reveal delay={0.2}>
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-                Pending Escalations
+            <div className="rounded-[32px] border border-white/50 bg-clay-card p-7 shadow-clayCard backdrop-blur-xl dark:border-white/10">
+              <h2 className="mb-1 flex items-center gap-2 font-heading text-xl font-extrabold text-clay-fg">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#FB7185] to-[#EF4444] text-white shadow-clayButton">
+                  <AlertTriangle className="h-4 w-4" />
+                </span>
+                Escalations
               </h2>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Critical cases awaiting your approval
-              </p>
+              <p className="mb-5 text-sm font-medium text-clay-muted">Critical cases awaiting approval</p>
 
               {loading ? (
                 <div className="space-y-3">
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
                 </div>
               ) : escalations.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                <p className="rounded-[20px] border border-dashed border-clay-line p-6 text-center text-sm font-medium text-clay-muted">
                   No critical escalations. Run the triage workflow to surface them.
                 </p>
               ) : (
@@ -296,18 +269,16 @@ export default function DashboardPage() {
                       >
                         <Link
                           href={`/feedback/${f.id}`}
-                          className="block rounded-lg border border-red-200 bg-red-50 p-3 transition-all hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-sm dark:border-red-900 dark:bg-red-950/30 dark:hover:bg-red-950/50"
+                          className="block rounded-[20px] border border-[#EF4444]/20 bg-[#EF4444]/[0.07] p-4 transition-all hover:-translate-y-0.5 hover:shadow-clayCard"
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
-                              {f.professionalName}
-                            </span>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-clay-fg">{f.professionalName}</span>
                             <SeverityBadge severity="CRITICAL" />
                           </div>
-                          <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-400">
+                          <p className="mt-1.5 line-clamp-2 text-xs font-medium text-clay-muted">
                             {f.triageResult?.keyDetails ?? f.feedbackText}
                           </p>
-                          <span className="mt-2 inline-flex items-center text-xs font-medium text-red-700 dark:text-red-400">
+                          <span className="mt-2 inline-flex items-center gap-0.5 text-xs font-bold text-[#DC2626] dark:text-[#F87171]">
                             Review case <ChevronRight className="h-3 w-3" />
                           </span>
                         </Link>

@@ -9,11 +9,11 @@ interface SpotlightCardProps {
   spotlightColor?: string;
 }
 
-/** Card with a soft radial spotlight that follows the cursor (ReactBits-style). */
+/** Glass-clay card that floats up on hover with a cursor-following spotlight. */
 export function SpotlightCard({
   children,
   className,
-  spotlightColor = "rgba(99, 102, 241, 0.14)",
+  spotlightColor = "rgba(124, 58, 237, 0.18)",
 }: SpotlightCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -30,7 +30,7 @@ export function SpotlightCard({
       ref={ref}
       onMouseMove={handleMove}
       className={cn(
-        "group/spot relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-transform duration-300 hover:-translate-y-0.5",
+        "group/spot relative overflow-hidden rounded-[28px] border border-white/50 bg-clay-card shadow-clayCard backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-clayCardHover dark:border-white/10",
         className
       )}
     >
